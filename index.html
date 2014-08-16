@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Human Activity Recognition Using Smartphones Dataset</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Human Activity Recognition Using Smartphones Dataset">
+  <meta name="author" content="Vaibhav Bhatnagar">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/tomorrow.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="./assets/css/ribbons.css"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>Human Activity Recognition Using Smartphones Dataset</h1>
+    <h2>Analyze the acitivity dataset</h2>
+    <p>Vaibhav Bhatnagar<br/></p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  <hgroup>
+    <h3>Agenda</h3>
+  </hgroup>
+  <article data-timings="">
+    <ol>
+<li>What is mean total number of steps taken per day</li>
+<li>What is the average daily activity pattern</li>
+<li>Imputing missing values</li>
+</ol>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="class" id="id" style="background:;">
+  <hgroup>
+    <h3>Load required libraries</h3>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">library(reshape2)
+library(lattice)
+</code></pre>
+
+<h3>Loading and preprocessing the data</h3>
+
+<pre><code class="r">data &lt;- read.csv(&quot;activity.csv&quot;, colClasses = c(&quot;numeric&quot;, &quot;Date&quot;, &quot;numeric&quot;))
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-3" style="background:;">
+  <hgroup>
+    <h3>What is mean total number of steps taken per day?</h3>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">melted &lt;- melt(data, id.vars=&quot;date&quot;, measure.var = &quot;steps&quot; )
+totalSteps &lt;- dcast(melted, date ~ variable, sum)
+
+hist(totalSteps$steps, xlab= &quot;Steps&quot;, main = paste(&quot;Histogram of&quot; , &quot;Steps per Day&quot;))
+</code></pre>
+
+<p><img src="assets/fig/unnamed-chunk-3.png" alt="plot of chunk unnamed-chunk-3"> </p>
+
+<h4>Calculate and report the mean and median total number of steps taken per day</h4>
+
+<h5>Mean</h5>
+
+<pre><code class="r">meanSteps &lt;- dcast(melted, date ~ variable, mean)
+</code></pre>
+
+<h4>Median</h4>
+
+<pre><code class="r">medianSteps &lt;- dcast(melted, date ~ variable, median, fill=0)
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:;">
+  <hgroup>
+    <h3>What is the average daily activity pattern?</h3>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">dataNoNA &lt;- na.omit(data)
+meltInterval &lt;- melt(dataNoNA, id.vars=&quot;interval&quot;, measure.var = &quot;steps&quot; )
+totalStepsInterval &lt;- dcast(meltInterval, interval ~ variable, sum)
+plot(totalStepsInterval$interval,totalStepsInterval$steps, type=&quot;l&quot;, xlab = &quot;Interval&quot;, ylab = &quot;Steps&quot;)
+title(main = &quot;Nmber of Steps per 5 min Interval&quot;)
+</code></pre>
+
+<p><img src="assets/fig/unnamed-chunk-6.png" alt="plot of chunk unnamed-chunk-6"> </p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-5" style="background:;">
+  <hgroup>
+    <h3>Question 3 - Imputing missing values</h3>
+  </hgroup>
+  <article data-timings="">
+    <h4>Poplulate the NA with the mean for that 5-minute interval</h4>
+
+<pre><code class="r">sum(is.na(data$steps))
+</code></pre>
+
+<pre><code>## [1] 2304
+</code></pre>
+
+<pre><code class="r">for(i in 1:nrow(data)){
+    temp &lt;- 0
+    if(is.na(data[i,1])){
+        temp &lt;- mean(subset(data, data$interval == data[i,3])[,1], na.rm=T)
+        data[i,1] &lt;- temp
+    }
+}
+</code></pre>
+
+<p>continue....</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-6" style="background:;">
+  <hgroup>
+    <h4>Histogram of the total number of steps taken each day</h4>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">meltedClean &lt;- melt(data, id.vars=&quot;date&quot;, measure.var = &quot;steps&quot; )
+totalStepsclean &lt;- dcast(meltedClean, date ~ variable, sum)
+
+hist(totalStepsclean$steps, xlab= &quot;Steps&quot;, main = paste(&quot;Histogram of&quot; , &quot;Steps per Day&quot;))
+</code></pre>
+
+<p><img src="assets/fig/unnamed-chunk-8.png" alt="plot of chunk unnamed-chunk-8"> </p>
+
+<h4>Mean</h4>
+
+<pre><code class="r">meanStepsClean &lt;- dcast(meltedClean, date ~ variable, mean)
+</code></pre>
+
+<h4>Median</h4>
+
+<pre><code class="r">medianStepsClean &lt;- dcast(meltedClean, date ~ variable, median)
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='Agenda'>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='Load required libraries'>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='What is mean total number of steps taken per day?'>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='What is the average daily activity pattern?'>
+         4
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=5 title='Question 3 - Imputing missing values'>
+         5
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=6 title='Histogram of the total number of steps taken each day'>
+         6
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  
+  <!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>
